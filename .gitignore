@@ -1,0 +1,13 @@
+# 依赖
+node_modules/
+
+# 渲染输出（体积大，可随时重新生成）
+out/
+frames/
+
+# 参考项目（第三方克隆，自带 .git）
+PDoomVideo/
+
+# 系统文件
+.DS_Store
+Thumbs.db

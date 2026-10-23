@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>smoke</title>
+<style>html,body{margin:0;background:#222}.p5Canvas{display:none!important}#out{width:960px;height:540px}</style>
+<script src="node_modules/p5/lib/p5.min.js"></script>
+<script src="node_modules/p5.brush/dist/p5.brush.js"></script>
+</head><body>
+<canvas id="out" width="1920" height="1080"></canvas>
+<script>
+const W=1920,H=1080;let outX,ready=false;
+async function setup(){
+  createCanvas(W,H,WEBGL);pixelDensity(1);noLoop();
+  brush.scaleBrushes(5);
+  brush.add('ink',{type:'default',weight:5,scatter:.25,sharpness:.8,grain:40,opacity:235,spacing:.2,pressure:[1.15,.75],rotate:'natural',noise:.15});
+  outX=document.getElementById('out').getContext('2d');
+  window.ready=true;
+}
+window.renderAt=async(t)=>{
+  randomSeed(7);
+  push();translate(-W/2,-H/2);
+  background(243,235,220);
+  // watercolor fill blob
+  const pts=[];for(let i=0;i<24;i++){const a=i/24*Math.PI*2;pts.push([960+Math.cos(a)*420+Math.random()*14,430+Math.sin(a)*260+Math.random()*14]);}
+  brush.noStroke();brush.noWash();brush.fill('#E27A92',170);brush.fillBleed(.18);brush.fillTexture(.5,.4);
+  brush.beginShape(.6);pts.forEach(p=>brush.vertex(p[0],p[1]));brush.endShape(true);
+  // wash + ink rect
+  brush.wash('#3A9C98',255);brush.noFill();brush.noHatch();brush.noStroke();
+  const ring=[[300,700],[800,700],[800,960],[300,960]];
+  brush.polygon(ring.map(p=>[p[0]+Math.random()*8-4,p[1]+Math.random()*8-4]));
+  brush.noWash();brush.noFill();brush.noHatch();brush.set('ink','#2B2233',2);
+  brush.beginShape(0);[[1120,700],[1620,700],[1620,960],[1120,960]].forEach(p=>brush.vertex(p[0],p[1]));brush.endShape(true);
+  pop();
+  // font probe on compositor
+  outX.drawImage(drawingContext.canvas,0,0,W,H);
+  outX.fillStyle='#2B2233';outX.textBaseline='middle';outX.textAlign='center';
+  const fonts=['20px "Ma Shan Zheng"','20px "LXGW WenKai"','20px "Kaiti SC"','20px "Xingkai SC"','20px "Hannotate SC"','20px "PingFang SC"'];
+  const report=fonts.map(f=>{outX.font=f;const w=outX.measureText('勾指起誓').width;outX.fillStyle='#2B2233';outX.fillText('勾指起誓 咚 叮',960,200+fonts.indexOf(f)*44);return f.split('"')[1]+':'+(w>40?'OK':'FALLBACK('+Math.round(w)+')');});
+  return report;
+};
+</script></body></html>
